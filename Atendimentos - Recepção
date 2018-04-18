@@ -1,0 +1,11 @@
+SELECT CAST(YEAR(A.DT_ENTRADA) AS CHAR(4)) + '-' + RIGHT('0' + CAST(MONTH(A.DT_ENTRADA) AS VARCHAR(2)),2) 'DATA',
+u.str_login as 'login',
+ea.id_atendimento as 'ATENDIMENTO',
+e.str_nome as 'exame'
+from exame_atendimento EA
+join usuario u on ea.id_usuario_criacao=u.id
+join exame e on ea.id_exame=e.id
+join atendimento a on ea.id_atendimento=a.id
+join prontuario p on a.id_prontuario=p.id
+where u.str_login in ('elaine.silva')
+order by 'data' asc
