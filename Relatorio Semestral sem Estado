@@ -1,0 +1,28 @@
+--select * from exame_atendimento SEM OS ESTADOS
+DECLARE @DATA_INI DATETIME
+DECLARE @DATA_FIM DATETIME
+SET @DATA_INI = '20170601 00:00:00'
+SET @DATA_FIM = '20170631 23:59:59'
+SELECT pos5_.id as unidade, pos5_.str_nome as unidade_nome, con3_.id as convenio, con_pj4_1_.str_nome as convenio_nome, e6_.id as id_exame, e6_.str_codigo as exame, e6_.str_nome as nome_exame, 
+datepart(month, this_.dt_entrada) as mes, datepart(year, this_.dt_entrada) as ano, count(*) as qtd, CAST(@DATA_INI AS DATE) as data_inicial_pesquisa, CAST(@DATA_FIM AS DATE) as data_final_pesquisa,
+cast(sum(this_.num_valor_exame_plano+this_.num_valor_exame_particular)/count(*) as numeric(10,2)) as 'Valor Unitário',
+cast(sum(this_.num_valor_exame_plano+this_.num_valor_exame_particular) as numeric(10,2)) as 'Valor Total'
+FROM exame_atendimento this_ 
+inner join atendimento a1_ on this_.id_atendimento=a1_.id 
+inner join posto pos5_ on a1_.id_posto=pos5_.id 
+inner join origem ori7_ on a1_.id_origem=ori7_.id 
+inner join empresa em9_ on a1_.id_empresa=em9_.id 
+inner join exame e6_ on this_.id_exame=e6_.id 
+inner join plano pl2_ on this_.id_plano=pl2_.id 
+inner join convenio con3_ on pl2_.id_convenio=con3_.id 
+inner join pessoa_juridica con_pj4_ on con3_.id_pessoa=con_pj4_.id 
+left outer join pessoa con_pj4_1_ on con_pj4_.id=con_pj4_1_.id 
+inner join material_humano mat8_ on this_.id_material_humano=mat8_.id 
+WHERE this_.dt_entrada between @DATA_INI and @DATA_FIM
+and not (this_.enum_status = 1) 
+and a1_.enum_status >= 2 
+and this_.bol_excluido = 0 
+and a1_.bol_excluido = 0 
+and em9_.id = 1 --id da empresa 
+GROUP BY pos5_.id, pos5_.str_nome, con3_.id, con_pj4_1_.str_nome, e6_.id, e6_.str_codigo, e6_.str_nome, datepart(month, this_.dt_entrada), datepart(year, this_.dt_entrada) 
+ORDER BY datepart(year, this_.dt_entrada) asc, datepart(month, this_.dt_entrada) asc, pos5_.id asc, con3_.id asc, e6_.id asc
